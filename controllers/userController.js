@@ -75,7 +75,7 @@ export function listUser(req,res){
 export function delUser(req,res){
     User.deleteOne({email: req.body.email}).then(()=>{
         res.json({
-            message : "The user was deleted from the database succesfully"
+            message : "The user was succesfully deleted from the database"
         })
 }).catch(()=>{
     res.json({
