@@ -72,8 +72,8 @@ export function listUser(req,res){
     })
 }
 
-export function delUset(req,res){
-    User.deleteOne({name: req.params.name}).then(()=>{
+export function delUser(req,res){
+    User.deleteOne({email: req.body.email}).then(()=>{
         res.json({
             message : "The user was deleted from the database succesfully"
         })
