@@ -67,7 +67,7 @@ export function listUser(req,res){
         }
     ).catch(()=>{
         res.json({
-            message : "The user list could not be loaded due to an error"
+            message : "An error blocked the loading of the User List"
         })
     })
 }
