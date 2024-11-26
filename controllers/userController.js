@@ -59,6 +59,23 @@ export function userLogin(req,res){
 }
 
 export function listUser(req,res){
+
+    console.log(req.user)
+
+    if(req.user == null){
+        res.json({
+            message : "You are not logged in"
+        })
+        return
+    }
+
+    if(req.user.type != "admin"){
+        res.json({
+            message : "You are not an admin and are not authorized to do this function"
+        })
+        return
+    }
+
     User.find().then(
         (userList)=>{
             res.json({
@@ -77,11 +94,11 @@ export function delUser(req,res){
         res.json({
             message : "The user was succesfully deleted from the database"
         })
-}).catch(()=>{
-    res.json({
-        message : "The user was not deleted from the database due to an error"
+    }).catch(()=>{
+        res.json({
+            message : "The user was not deleted from the database due to an error"
+        })
     })
-})
 }
 
 

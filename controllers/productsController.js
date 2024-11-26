@@ -63,16 +63,16 @@ export function delProducts(req,res){
         })
         return
     }
-    
+
     Products.deleteOne({name: req.params.name}).then(()=>{
         res.json({
             message : "The producs was deleted from the database succesfully"
         })
-}).catch(()=>{
-    res.json({
-        message : "The product was not deleted from the database due to an error"
+    }).catch(()=>{
+        res.json({
+            message : "The product was not deleted from the database due to an error"
+        })
     })
-})
 }
 
 export function listProductsByName(req,res){
