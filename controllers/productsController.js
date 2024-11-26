@@ -47,6 +47,23 @@ export function newProducts(req,res){
 }
 
 export function delProducts(req,res){
+
+    console.log(req.user)
+
+    if(req.user == null){
+        res.json({
+            message : "You are not logged in"
+        })
+        return
+    }
+
+    if(req.user.type != "admin"){
+        res.json({
+            message : "You are not an admin and are not authorized to do this function"
+        })
+        return
+    }
+    
     Products.deleteOne({name: req.params.name}).then(()=>{
         res.json({
             message : "The producs was deleted from the database succesfully"
