@@ -22,7 +22,7 @@ export function newProducts(req,res){
 
     if(req.user == null){
         res.json({
-            message : "You are bot logged in"
+            message : "You are not logged in"
         })
         return
     }
