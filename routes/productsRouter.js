@@ -6,12 +6,6 @@ const productsRouter = express.Router();
 
 productsRouter.get('/', listProducts)
 
-productsRouter.get('/filter', (req,res)=>{
-    res.json({
-        message : "This product is filtered"
-    })
-})
-
 productsRouter.get('/:name', listProductsByName)
 
 productsRouter.post('/', newProducts)
