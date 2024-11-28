@@ -1,22 +1,20 @@
 import Products from "../models/products.js"
 
-export function listProducts(req,res){
-    Products.find().then(
-        (productsList)=>{
-            res.status(500).json({
-                list : productsList
-            })
-        }
-    ).catch(
-        (err)=>{
+export async function listProducts(req,res){
+
+    try {
+    const productsList = await Products.find()
             res.json({
-                message : "Due to an error the product list couldnt be identified"
-            })
-        }
-    )
+                        list : productsList
+                    })
+    } catch (error) {
+        res.json({
+            message : "Due to an error the product list couldnt be identified"
+        })
+    }          
 }
 
-export function newProducts(req,res){
+export async function newProducts(req,res){
 
     console.log(req.user)
 
@@ -35,18 +33,21 @@ export function newProducts(req,res){
     }
 
     const products = new Products(req.body)
-    products.save().then(()=>{
+    
+    try {
+        await products.save()
         res.json({
             message : "The product was added to the database succesfully"
         })
-    }).catch(()=>{
+
+    } catch (error) {
         res.json({
             message : "The product was not added to the database due to an error"
         })
-    })
+    }
 }
 
-export function delProducts(req,res){
+export async function delProducts(req,res){
 
     console.log(req.user)
 
@@ -63,39 +64,37 @@ export function delProducts(req,res){
         })
         return
     }
-
-    Products.deleteOne({name: req.params.name}).then(()=>{
+    
+    try {
+        await Products.deleteOne({name: req.params.name})
         res.json({
             message : "The producs was deleted from the database succesfully"
         })
-    }).catch(()=>{
+    } catch (error) {
         res.json({
             message : "The product was not deleted from the database due to an error"
         })
-    })
+    }
 }
 
-export function listProductsByName(req,res){
-
+export async function listProductsByName(req, res) {
     const name = req.params.name;
 
-    Products.find({name : name}).then(
-        (productsList)=>{
-            if(productsList.length == 0){
+    try {
+        await Products.find({ name: name }).then((productsList) => {
+            if (productsList.length == 0) {
                 res.json({
-                    message : "Product not found"
-                })
-            }else{
-            res.json({
-                list : productsList
-            })
-        }
-        }
-    ).catch(
-        ()=>{
-            res.json({
-                message : "Due to an error the product list couldnt be identified"
-            })
-        }
-    )
+                    message: "Product not found",
+                });
+            } else {
+                res.json({
+                    list: productsList,
+                });
+            }
+        });
+    } catch (error) {
+        res.json({
+            message: "Due to an error the product list couldn't be identified",
+        });
+    }
 }
