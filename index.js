@@ -29,7 +29,7 @@ app.use(
     console.log(token)
 
     if(token != null){
-      jwt.verify(token, "revenge-is-mine-2025", (error, decoded)=>{
+      jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decoded)=>{
         if(!error){
           req.user = decoded
         }

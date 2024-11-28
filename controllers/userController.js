@@ -1,6 +1,9 @@
 import User from "../models/user.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 export function newUser(req,res){
     const newUserData = req.body;
@@ -42,7 +45,7 @@ export function userLogin(req,res){
                         isBlocked : user.isBlocked,
                         type : user.type,
                         profilePicture : user.profilePicture
-                    }, "revenge-is-mine-2025")
+                    }, process.env.JWT_SECRET_KEY)
 
                     res.json({
                         message : "Your login details are correct",
