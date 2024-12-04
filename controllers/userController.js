@@ -5,63 +5,67 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-export function newUser(req,res){
+export async function newUser(req,res){
     const newUserData = req.body;
 
     newUserData.password = bcrypt.hashSync(newUserData.password, 10)
 
     const user = new User(newUserData)
 
-    user.save().then(()=>{
+    try {
+        await user.save()
         res.json({
             message : "The user was added to the database succesfully"
         })
-    }).catch(()=>{
+    } catch (error) {
         res.json({
             message : "The user was not added to the database due to an error"
         })
-    })
+    }
 }
 
-export function userLogin(req,res){
+export async function userLogin(req,res){
 
-    User.find({email : req.body.email}).then(
-        (userList)=>{
-            if(userList.length == 0){
+    try {
+        const user = await User.find({email : req.body.email})
+        if(!user){
+            res.json({
+                message : "The specific user was not found"
+            })
+        }else {
+            const user = userList[0];
+
+            const isPasswordCorrect = await bcrypt.compareSync(req.body.password, user.password);
+
+            if (isPasswordCorrect){
+                
+                const token = jwt.sign({
+                    email : user.email,
+                    firstName : user.firstName,
+                    lastName : user.lastName,
+                    isBlocked : user.isBlocked,
+                    type : user.type,
+                    profilePicture : user.profilePicture
+                }, process.env.JWT_SECRET_KEY)
+
                 res.json({
-                    message : "The specific user was not found"
+                    message : "Your login details are correct",
+                    token : token
                 })
-            }else {
-                const user = userList[0];
-
-                const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
-
-                if (isPasswordCorrect){
-                    
-                    const token = jwt.sign({
-                        email : user.email,
-                        firstName : user.firstName,
-                        lastName : user.lastName,
-                        isBlocked : user.isBlocked,
-                        type : user.type,
-                        profilePicture : user.profilePicture
-                    }, process.env.JWT_SECRET_KEY)
-
+                }else{
                     res.json({
-                        message : "Your login details are correct",
-                        token : token
+                        message : "You password is incorrect. Please try again"
                     })
-                    }else{
-                        res.json({
-                            message : "You password is incorrect. Please try again"
-                        })
-                }
             }
         }
-    )
+    } catch (error) {
+        res.json({
+            message : "The user was not created due to an error"
+        })
+    }
 }
 
-export function listUser(req,res){
+export async function listUser(req,res){
 
     console.log(req.user)
 
@@ -79,29 +83,30 @@ export function listUser(req,res){
         return
     }
 
-    User.find().then(
-        (userList)=>{
+    try {
+        const userList = await User.find()
             res.json({
                 list : userList
             })
-        }
-    ).catch(()=>{
+    } catch (error) {
         res.json({
             message : "An error blocked the loading of the User List"
         })
-    })
+    }
 }
 
-export function delUser(req,res){
-    User.deleteOne({email: req.body.email}).then(()=>{
-        res.json({
-            message : "The user was succesfully deleted from the database"
-        })
-    }).catch(()=>{
+export async function delUser(req,res){
+
+    try {
+       await User.deleteOne({email: req.body.email})
+       res.json({
+        message : "The user was succesfully deleted from the database"
+    })
+    } catch (error) {
         res.json({
             message : "The user was not deleted from the database due to an error"
         })
-    })
+    }
 }
 
 
