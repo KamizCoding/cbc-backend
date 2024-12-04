@@ -8,6 +8,23 @@ dotenv.config()
 export async function newUser(req,res){
     const newUserData = req.body;
 
+    if(newUserData.type == "admin"){
+
+        if(req.user == null){
+            res.json({
+                message : "Please login as an admin to create a new admin account"
+            })
+            return
+        }
+
+        if(req.user.type != "admin"){
+            res.json({
+                message : "Please login as an admin to create a new admin account"
+            })
+            return
+        }
+    }
+
     newUserData.password = bcrypt.hashSync(newUserData.password, 10)
 
     const user = new User(newUserData)
@@ -27,25 +44,25 @@ export async function newUser(req,res){
 export async function userLogin(req,res){
 
     try {
-        const user = await User.find({email : req.body.email})
-        if(!user){
+        const userList = await User.find({email : req.body.email})
+        if(userList.length === 0){
             res.json({
                 message : "The specific user was not found"
             })
         }else {
-            const user = userList[0];
+            const userObj = userList[0];
 
-            const isPasswordCorrect = await bcrypt.compareSync(req.body.password, user.password);
+            const isPasswordCorrect = bcrypt.compareSync(req.body.password, userObj.password);
 
             if (isPasswordCorrect){
                 
                 const token = jwt.sign({
-                    email : user.email,
-                    firstName : user.firstName,
-                    lastName : user.lastName,
-                    isBlocked : user.isBlocked,
-                    type : user.type,
-                    profilePicture : user.profilePicture
+                    email : userObj.email,
+                    firstName : userObj.firstName,
+                    lastName : userObj.lastName,
+                    isBlocked : userObj.isBlocked,
+                    type : userObj.type,
+                    profilePicture : userObj.profilePicture
                 }, process.env.JWT_SECRET_KEY)
 
                 res.json({
@@ -59,6 +76,7 @@ export async function userLogin(req,res){
             }
         }
     } catch (error) {
+        console.error(error);
         res.json({
             message : "The user was not created due to an error"
         })
