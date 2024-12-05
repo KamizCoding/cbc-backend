@@ -10,7 +10,7 @@ export async function listProducts(req,res){
                     })
     } catch (error) {
         res.json({
-            message : "Due to an error the product list couldnt be identified"
+            message : "Due to an error the product list couldnt be identified " + error
         })
     }          
 }
@@ -43,7 +43,7 @@ export async function newProducts(req,res){
 
     } catch (error) {
         res.json({
-            message : "The product was not added to the database due to an error" 
+            message : "The product was not added to the database due to an error " + error 
         })
     }
 }
@@ -73,7 +73,7 @@ export async function delProducts(req,res){
         })
     } catch (error) {
         res.json({
-            message : "The product was not deleted from the database due to an error"
+            message : "The product was not deleted from the database due to an error " + error
         })
     }
 }
@@ -95,7 +95,7 @@ export async function listProductsByName(req, res) {
         });
     } catch (error) {
         res.json({
-            message: "Due to an error the product list couldn't be identified",
+            message: "Due to an error the product list couldn't be identified " + error
         });
     }
 }

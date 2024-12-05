@@ -36,7 +36,7 @@ export async function newUser(req,res){
         })
     } catch (error) {
         res.json({
-            message : "The user was not added to the database due to an error"
+            message : "The user was not added to the database due to an error " + error
         })
     }
 }
@@ -78,7 +78,7 @@ export async function userLogin(req,res){
     } catch (error) {
         console.error(error);
         res.json({
-            message : "The user was not created due to an error"
+            message : "The user was not created due to an error " + error
         })
     }
 }
@@ -108,7 +108,7 @@ export async function listUser(req,res){
             })
     } catch (error) {
         res.json({
-            message : "An error blocked the loading of the User List"
+            message : "An error blocked the loading of the User List " + error
         })
     }
 }
@@ -122,7 +122,7 @@ export async function delUser(req,res){
     })
     } catch (error) {
         res.json({
-            message : "The user was not deleted from the database due to an error"
+            message : "The user was not deleted from the database due to an error " + error
         })
     }
 }
