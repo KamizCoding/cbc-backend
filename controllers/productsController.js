@@ -1,4 +1,5 @@
 import Products from "../models/products.js"
+import { isAdmin } from "./userController.js"
 
 export async function listProducts(req,res){
 
@@ -25,7 +26,7 @@ export async function newProducts(req,res){
         return
     }
 
-    if(req.user.type != "admin"){
+    if(!isAdmin(req)){
         res.json({
             message : "You are not an admin and are not authorized to do this function"
         })
@@ -42,7 +43,7 @@ export async function newProducts(req,res){
 
     } catch (error) {
         res.json({
-            message : "The product was not added to the database due to an error"
+            message : "The product was not added to the database due to an error" 
         })
     }
 }
@@ -58,7 +59,7 @@ export async function delProducts(req,res){
         return
     }
 
-    if(req.user.type != "admin"){
+    if(!isAdmin(req)){
         res.json({
             message : "You are not an admin and are not authorized to do this function"
         })
