@@ -94,7 +94,7 @@ export async function listUser(req,res){
         return
     }
 
-    if(req.user.type != "admin"){
+    if(!isAdmin(req)){
         res.json({
             message : "You are not an admin and are not authorized to do this function"
         })
