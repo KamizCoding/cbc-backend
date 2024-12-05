@@ -45,7 +45,7 @@ export async function userLogin(req,res){
 
     try {
         const userList = await User.find({email : req.body.email})
-        if(userList.length === 0){
+        if(userList.length == 0){
             res.json({
                 message : "The specific user was not found"
             })
