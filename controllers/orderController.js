@@ -47,3 +47,17 @@ export async function newOrder(req,res){
         })
     }
 }
+
+export async function listOrder(req,res){
+    try {
+        const orderList = await Order.find({email : req.user.email})
+
+        res.json({
+            list : orderList
+        })
+    } catch (error) {
+        res.json({
+            message : "he order lis could not be generated due to an error " + error
+        })
+    }
+}
