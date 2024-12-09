@@ -40,7 +40,14 @@ export async function newOrder(req,res){
             })
 
             console.log(product)
+
+            if(product == null){
+                res.json({
+                    message : "the product referring to id "+newOrderData.orderedItems[i].productId+" was not found"
+                })
+            }
         }
+        
 
         
         // newOrderData.orderId = orderId
