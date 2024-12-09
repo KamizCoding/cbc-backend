@@ -39,27 +39,33 @@ export async function newOrder(req,res){
                 productId : newOrderData.orderedItems[i].productId
             })
 
-            console.log(product)
-
             if(product == null){
                 res.json({
                     message : "the product referring to id "+newOrderData.orderedItems[i].productId+" was not found"
                 })
+                return
             }
+
+            newProductArray[i] = {
+                name : product.productName,
+                price : product.price,
+                quantity : newOrderData.orderedItems[i].quantity,
+                image : product.images[0]
+            }    
         }
-        
 
-        
-        // newOrderData.orderId = orderId
-        // newOrderData.email = req.user.email
+        newOrderData.orderedItems = newProductArray
+                
+        newOrderData.orderId = orderId
+        newOrderData.email = req.user.email
 
-        // const order = new Order(newOrderData)
+        const order = new Order(newOrderData)
 
-        // await order.save()
+        await order.save()
 
-        // res.json({
-        //     message : "The order was succesfully created"
-        // })
+        res.json({
+            message : "The order was succesfully created"
+        })
 
     } catch (error) {
         res.status(500).json({
