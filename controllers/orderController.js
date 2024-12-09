@@ -70,7 +70,7 @@ export async function listOrder(req,res){
         })
     } catch (error) {
         res.json({
-            message : "he order lis could not be generated due to an error " + error
+            message : "The order list could not be generated due to an error " + error
         })
     }
 }
