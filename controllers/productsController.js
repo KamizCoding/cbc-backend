@@ -1,5 +1,6 @@
 import Products from "../models/products.js"
 import { isAdmin } from "./userController.js"
+import mongoose from "mongoose";
 
 export async function listProducts(req,res){
 
@@ -88,6 +89,48 @@ export async function delProducts(req,res){
     } catch (error) {
         res.json({
             message : "The product was not deleted from the database due to an error " + error
+        })
+    }
+}
+
+export async function updateProducts(req,res) {
+    console.log(req.user)
+
+    if(req.user == null){
+        res.json({
+            message : "You are not logged in"
+        })
+        return
+    }
+
+    if(!isAdmin(req)){
+        res.json({
+            message : "You are not an admin and are not authorized to do this function"
+        })
+        return
+    }
+
+    const { productId } = req.params;
+    const updateData = req.body;
+
+    try {
+        const updatedProduct = await Products.findOneAndUpdate(
+            { productId },
+            updateData,
+            { new: true, runValidators: true }
+        )
+        if(!updatedProduct){
+            res.json({
+                message : "The product with id "+{ productId }+" was not found"
+            })
+            return
+        }
+        res.json({
+            message : "The product was updated succesfully"
+        })
+    } catch (error) {
+        res.json({
+            message : "The product was not updated sue to an error " + error
         })
     }
 }
