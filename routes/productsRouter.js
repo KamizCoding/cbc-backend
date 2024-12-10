@@ -10,7 +10,7 @@ productsRouter.get('/:name', listProductsByName)
 
 productsRouter.post('/', newProducts)
 
-productsRouter.delete('/:name', delProducts)
+productsRouter.delete('/:productId', delProducts)
 
 
 export default productsRouter;

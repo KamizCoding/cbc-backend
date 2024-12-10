@@ -75,7 +75,7 @@ export async function delProducts(req,res){
     }
     
     try {
-        await Products.deleteOne({name: req.params.name})
+        await Products.deleteOne({productId: req.params.productId})
         res.json({
             message : "The producs was deleted from the database succesfully"
         })
