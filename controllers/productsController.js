@@ -1,6 +1,5 @@
 import Products from "../models/products.js"
 import { isAdmin } from "./userController.js"
-import mongoose from "mongoose";
 
 export async function listProducts(req,res){
 
