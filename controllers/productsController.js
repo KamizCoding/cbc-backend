@@ -76,7 +76,7 @@ export async function delProducts(req,res){
     
     try {
         const result = await Products.findOneAndDelete({productId: req.params.productId})
-        if(result.deletedCount == 0){
+        if(!result){
             res.json({
                 message : "The product with id "+req.params.productId+" was not found"
             })
