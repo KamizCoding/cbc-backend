@@ -33,6 +33,14 @@ export async function newProducts(req,res){
         return
     }
 
+    const { productName,price,description} = req.body;
+     if(!productName||!price||!description){
+        res.json({
+            message : "Missing required fields: name, price, and description are required"
+        })
+        return
+     }
+
     const products = new Products(req.body)
     
     try {
