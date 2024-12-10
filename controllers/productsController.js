@@ -135,10 +135,10 @@ export async function updateProducts(req,res) {
 }
 
 export async function listProductsByName(req, res) {
-    const name = req.params.name;
+    const productName = req.params.productName;
 
     try {
-        await Products.find({ name: name }).then((productsList) => {
+        const productsList = await Products.find({ productName: productName })
             if (productsList.length == 0) {
                 res.json({
                     message: "Product not found",
@@ -148,7 +148,6 @@ export async function listProductsByName(req, res) {
                     list: productsList,
                 });
             }
-        });
     } catch (error) {
         res.json({
             message: "Due to an error the product list couldn't be identified " + error
