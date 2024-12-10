@@ -6,7 +6,7 @@ const productsRouter = express.Router();
 
 productsRouter.get('/', listProducts)
 
-productsRouter.get('/:name', listProductsByName)
+productsRouter.get('/:productName', listProductsByName)
 
 productsRouter.post('/', newProducts)
 
