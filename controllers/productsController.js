@@ -80,9 +80,10 @@ export async function delProducts(req,res){
             res.json({
                 message : "The product with id "+req.params.productId+" was not found"
             })
+            return
         }
         res.json({
-            message : "The producs was deleted from the database succesfully",
+            message : "The product was deleted from the database succesfully",
             result,
         })
     } catch (error) {
@@ -120,7 +121,7 @@ export async function updateProducts(req,res) {
         )
         if(!updatedProduct){
             res.json({
-                message : "The product with id "+{ productId }+" was not found"
+                message : "The product with id "+productId+" was not found"
             })
             return
         }
@@ -129,7 +130,7 @@ export async function updateProducts(req,res) {
         })
     } catch (error) {
         res.json({
-            message : "The product was not updated sue to an error " + error
+            message : "The product was not updated due to an error " + error
         })
     }
 }
