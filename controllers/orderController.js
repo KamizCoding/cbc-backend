@@ -34,10 +34,9 @@ export async function newOrder(req,res){
 
         const newProductArray = []
 
-        for(let i=0;i<newOrderData.orderedItems.length;i++){
-            const product = await Products.findOne({
-                productId : newOrderData.orderedItems[i].productId
-            })
+        for (let i = 0; i < newOrderData.orderedItems.length; i++) {
+            const { productId, quantity } = newOrderData.orderedItems[i];
+            const product = await Products.findOne({ productId });
 
             if(product == null){
                 res.json({
@@ -45,6 +44,15 @@ export async function newOrder(req,res){
                 })
                 return
             }
+
+            if (product.stock < quantity) {
+                return res.status(400).json({
+                    message: `Insufficient stock for product ${product.productName}. Only ${product.stock} available.`
+                });
+            }
+
+            product.stock -= quantity;
+            await product.save();
 
             const productImage = product.images && product.images[0] ? product.images[0] : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficonmonstr.com%2Fproduct-3-svg%2F&psig=AOvVaw2SWPd8pBJ9yybxvTNGiG3f&ust=1733981616869000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCgt4X_nooDFQAAAAAdAAAAABAE";
 
