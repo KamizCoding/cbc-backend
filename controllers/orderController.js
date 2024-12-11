@@ -46,11 +46,13 @@ export async function newOrder(req,res){
                 return
             }
 
+            const productImage = product.images && product.images[0] ? product.images[0] : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficonmonstr.com%2Fproduct-3-svg%2F&psig=AOvVaw2SWPd8pBJ9yybxvTNGiG3f&ust=1733981616869000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCgt4X_nooDFQAAAAAdAAAAABAE";
+
             newProductArray[i] = {
                 name : product.productName,
                 price : product.price,
                 quantity : newOrderData.orderedItems[i].quantity,
-                image : product.images[0]
+                image : productImage
             }    
         }
 
