@@ -38,8 +38,9 @@ const orderSchema = mongoose.Schema({
         type : String
     },
     status : {
-        type : String,
-        default : "Processing"
+        type: String,
+        enum: ['processing', 'shipped', 'completed', 'cancelled'],
+        default: 'processing'
     },
     notes : {
         type : String,

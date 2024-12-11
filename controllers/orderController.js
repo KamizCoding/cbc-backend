@@ -96,3 +96,44 @@ export async function listOrder(req,res){
         })
     }
 }
+
+export async function cancelOrder(req,res){
+    try {
+        const { orderId } = req.params;
+        
+        const order = await Order.findOne({orderId, email : req.user.email});
+
+        if(!order){
+            res.json({
+                message : `The order with id ${orderId} was not found`
+            })
+            return
+        }
+
+        if (order.status == "cancelled"){
+            res.json({
+                message :`The order with id ${orderId} is already cancelled`
+            })
+            return
+        }
+
+        if (order.status == "shipped" || order.status == "completed"){
+            res.json({
+                message : `The order with id ${orderId} is already shipped/completed`
+            })
+            return
+        }
+
+        order.status = "cancelled";
+        await order.save();
+
+        res.json({
+            message : `The order with id ${orderId} has been succesfully cancelled`
+        })
+
+    } catch (error) {
+        res.json ({
+            message : "The order was not cancelled due to an error" + error
+        })
+    }
+}
