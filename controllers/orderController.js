@@ -64,7 +64,14 @@ export async function newOrder(req,res){
         await order.save()
 
         res.json({
-            message : "The order was succesfully created"
+            message : "The order was succesfully created",
+            order: {
+                orderId: order.orderId,
+                email: order.email,
+                orderedItems: order.orderedItems,
+                totalAmount: order.orderedItems.reduce((total, item) => total + item.price * item.quantity, 0),
+                orderDate: order.date || new Date().toISOString(),
+            }
         })
 
     } catch (error) {
