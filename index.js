@@ -6,6 +6,7 @@ import userRouter from './routes/userRouter.js';
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import orderRouter from './routes/orderRouter.js';
+import cors from "cors";
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ connection.once("open",()=>{
   console.log("Database connected");
 })
 
+app.use(cors())
 
 app.use(bodyParser.json())
 
