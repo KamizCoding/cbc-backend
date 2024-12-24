@@ -67,7 +67,14 @@ export async function userLogin(req,res){
 
                 res.json({
                     message : "Your login details are correct",
-                    token : token
+                    token : token,
+                    user : {
+                        firstName : userObj.firstName,
+                        lastName : userObj.lastName,
+                        type : userObj.type,
+                        profilePicture : userObj.profilePicture,
+                        email : userObj.email
+                    }
                 })
                 }else{
                     res.json({
