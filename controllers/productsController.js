@@ -50,7 +50,7 @@ export async function newProducts(req,res){
         })
 
     } catch (error) {
-        res.json({
+        res.status(403).json({
             message : "The product was not added to the database due to an error " + error 
         })
     }
