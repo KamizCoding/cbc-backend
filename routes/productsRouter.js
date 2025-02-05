@@ -12,7 +12,7 @@ productsRouter.post('/', newProducts)
 
 productsRouter.delete('/:productId', delProducts)
 
-productsRouter.post('/update/:productId', updateProducts)
+productsRouter.put('/update/:productId', updateProducts)
 
 
 export default productsRouter;
