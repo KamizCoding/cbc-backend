@@ -155,3 +155,17 @@ export async function listProductsByName(req, res) {
         });
     }
 }
+
+export async function listProductsById(req, res){
+    try {
+        const productId =req.params.productId
+
+        const product = await Products.findOne({productId : productId})
+
+        res.json(product)
+    } catch (error) {
+        res.json({
+            message: "Due to an error the product couldn't be identified " + error
+        });
+    }
+}
