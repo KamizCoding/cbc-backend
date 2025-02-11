@@ -45,12 +45,6 @@ export async function newOrder(req,res){
                 return
             }
 
-            if (product.stock < quantity) {
-                return res.status(400).json({
-                    message: `Insufficient stock for product ${product.productName}. Only ${product.stock} available.`
-                });
-            }
-
             product.stock -= quantity;
             await product.save();
 
@@ -58,7 +52,7 @@ export async function newOrder(req,res){
 
             newProductArray[i] = {
                 name : product.productName,
-                price : product.price,
+                price : product.lastPrice,
                 quantity : newOrderData.orderedItems[i].quantity,
                 image : productImage
             }    
@@ -145,3 +139,57 @@ export async function cancelOrder(req,res){
         })
     }
 }
+
+export async function getQuote(req,res){
+    try {
+        const newOrderData = req.body; 
+
+        const newProductArray = [];
+
+        let total = 0;
+        let labeledTotal = 0;
+
+        for (let i = 0; i < newOrderData.orderedItems.length; i++) {
+            const { productId, quantity } = newOrderData.orderedItems[i];
+            const product = await Products.findOne({ productId });
+
+            if(product == null){
+                res.json({
+                    message : "the product referring to id "+newOrderData.orderedItems[i].productId+" was not found"
+                })
+                return
+            }
+
+            product.stock -= quantity;
+            await product.save();
+
+            const productImage = product.images && product.images[0] ? product.images[0] : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficonmonstr.com%2Fproduct-3-svg%2F&psig=AOvVaw2SWPd8pBJ9yybxvTNGiG3f&ust=1733981616869000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCgt4X_nooDFQAAAAAdAAAAABAE";
+
+            labeledTotal += product.price * newOrderData.orderedItems[i].quantity; 
+            total += product.lastPrice * newOrderData.orderedItems[i].quantity;
+
+            newProductArray[i] = {
+                name : product.productName,
+                price : product.lastPrice,
+                labeledPrice : product.price,
+                quantity : newOrderData.orderedItems[i].quantity,
+                image : productImage
+            }    
+        }
+
+        newOrderData.orderedItems = newProductArray;
+        newOrderData.total = total;
+
+        res.json({
+            orderedItems : newProductArray,
+            total : total,
+            labeledTotal : labeledTotal
+        });
+                
+    } catch (error) {
+        res.status(500).json({
+            message : error.message
+        })
+    }
+}
+
