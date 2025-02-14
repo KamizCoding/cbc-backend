@@ -175,10 +175,52 @@ export async function googleLogin(req, res) {
         },
       }
     );
-    res.json({
-      message: "Google Login Successful",
-      user: response.data,
-    });
+    const email = response.data.email;
+
+    const userList = await User.find({email:email})
+
+    if (userList.length > 0){
+        const user = userList[0]
+        const token = jwt.sign({
+            email : user.email,
+            firstName : user.firstName,
+            lastName : user.lastName,
+            isBlocked : user.isBlocked,
+            type : user.type,
+            profilePicture : user.profilePicture
+        }, process.env.JWT_SECRET_KEY)
+
+        res.json({
+            message : "Google Login Succesful",
+            token : token,
+            user : {
+                firstName : user.firstName,
+                lastName : user.lastName,
+                type : user.type,
+                profilePicture : user.profilePicture,
+                email : user.email
+            }
+        })
+    }else{
+        const newUserData = {
+            email : email,
+            firstName : response.data.given_name,
+            lastName : response.data.family_name,
+            type : "customer",
+            password : "newuser",
+            profilePicture : response.data.picture
+        }
+        const user = new User(newUserData)
+        await user.save().then(() => {
+            res.json({
+                message : "The New User Was Succesfully Created "
+            })
+        }).catch((error) => {
+            res.json({
+                message : "The New User Was Not Created"
+            })
+        })
+    }    
   } catch (error) {
     res.json({
       message: "Google Login Failed",
