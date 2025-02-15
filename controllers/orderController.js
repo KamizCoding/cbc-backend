@@ -232,7 +232,7 @@ export async function updateOrder(req, res) {
     const notes = req.body.notes;
     const status = req.body.status;
 
-    const updateOrder = await Order.findOneAndUpdte(
+    const updateOrder = await Order.findOneAndUpdate(
       {orderId : orderId},
       {notes : notes, status : status}
     );
