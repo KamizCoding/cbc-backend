@@ -90,20 +90,19 @@ export async function listOrder(req, res) {
       res.json({
         list: orderList,
       });
-      return
-    } else if (isAdmin(req)){
-        const orderList = await Order.find({ });
+      return;
+    } else if (isAdmin(req)) {
+      const orderList = await Order.find({});
 
-        res.json({
-            list: orderList,
-          });
-          return
+      res.json({
+        list: orderList,
+      });
+      return;
     } else {
-        res.json({
-            message: "Please login to view orders"
-        })
+      res.json({
+        message: "Please login to view orders",
+      });
     }
-    
   } catch (error) {
     res.json({
       message: "The order list could not be generated due to an error " + error,
@@ -205,6 +204,46 @@ export async function getQuote(req, res) {
   } catch (error) {
     res.status(500).json({
       message: error.message,
+    });
+  }
+}
+
+export async function updateOrder(req, res) {
+  if (!isAdmin(req)) {
+    res.json({
+      message: "You Have To Be An Admin To Be Able To Update Orders",
+    });
+  }
+
+  try {
+    const orderId = req.params.orderId;
+
+    const order = await Order.findOne({
+      orderId : orderId,
+    });
+
+    if(order == null){
+      res.json({
+        message : "The Order Was Not Found"
+      });
+      return
+    }
+
+    const notes = req.body.notes;
+    const status = req.body.status;
+
+    const updateOrder = await Order.findOneAndUpdte(
+      {orderId : orderId},
+      {notes : notes, status : status}
+    );
+
+    res.json({
+      message : "The Order Was Updated Succesfully"
+    })
+
+  } catch (error) {
+    res.json({
+      message : "The Order Was Not Updated Succesfully Due To " + error.message,
     });
   }
 }
