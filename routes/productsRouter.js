@@ -8,7 +8,7 @@ productsRouter.get('/', listProducts)
 
 productsRouter.get('/:productId', listProductsById)
 
-productsRouter.get('/:productName', listProductsByName)
+productsRouter.get('/search/:query', listProductsByName)
 
 productsRouter.post('/', newProducts)
 

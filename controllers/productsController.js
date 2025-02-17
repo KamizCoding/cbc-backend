@@ -136,10 +136,11 @@ export async function updateProducts(req,res) {
 }
 
 export async function listProductsByName(req, res) {
-    const productName = req.params.productName;
+
+    const query = req.params.query;
 
     try {
-        const productsList = await Products.find({ productName: productName })
+        const productsList = await Products.find({ productName : {$regex : query, $options : "i"} })
             if (productsList.length == 0) {
                 res.json({
                     message: "Product not found",
