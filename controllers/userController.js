@@ -45,55 +45,66 @@ export async function newUser(req, res) {
 export async function userLogin(req, res) {
   try {
     const userList = await User.find({ email: req.body.email });
-    if (userList.length == 0) {
-      res.json({
-        message: "The specific user was not found",
-      });
-    } else {
-      const userObj = userList[0];
 
-      const isPasswordCorrect = bcrypt.compareSync(
-        req.body.password,
-        userObj.password
+    if (userList.length === 0) {
+      return res.json({
+        message: "The specific user was not found",
+        success: false,
+      });
+    }
+
+    const userObj = userList[0];
+
+    if (userObj.isBlocked) {
+      return res.json({
+        message: "Your account has been blocked. Contact support for assistance.",
+        success: false,
+        blocked: true, 
+      });
+    }
+
+    const isPasswordCorrect = bcrypt.compareSync(req.body.password, userObj.password);
+
+    if (isPasswordCorrect) {
+      const token = jwt.sign(
+        {
+          email: userObj.email,
+          firstName: userObj.firstName,
+          lastName: userObj.lastName,
+          isBlocked: userObj.isBlocked,
+          type: userObj.type,
+          profilePicture: userObj.profilePicture,
+        },
+        process.env.JWT_SECRET_KEY
       );
 
-      if (isPasswordCorrect) {
-        const token = jwt.sign(
-          {
-            email: userObj.email,
-            firstName: userObj.firstName,
-            lastName: userObj.lastName,
-            isBlocked: userObj.isBlocked,
-            type: userObj.type,
-            profilePicture: userObj.profilePicture,
-          },
-          process.env.JWT_SECRET_KEY
-        );
-
-        res.json({
-          message: "Your login details are correct",
-          token: token,
-          user: {
-            firstName: userObj.firstName,
-            lastName: userObj.lastName,
-            type: userObj.type,
-            profilePicture: userObj.profilePicture,
-            email: userObj.email,
-          },
-        });
-      } else {
-        res.json({
-          message: "You password is incorrect. Please try again",
-        });
-      }
+      return res.json({
+        message: "Your login details are correct",
+        success: true, 
+        token: token,
+        user: {
+          firstName: userObj.firstName,
+          lastName: userObj.lastName,
+          type: userObj.type,
+          profilePicture: userObj.profilePicture,
+          email: userObj.email,
+        },
+      });
+    } else {
+      return res.json({
+        message: "Your password is incorrect. Please try again",
+        success: false,
+      });
     }
   } catch (error) {
     console.error(error);
-    res.json({
-      message: "The user was not created due to an error " + error,
+    return res.json({
+      message: "The user was not created due to an error: " + error,
+      success: false,
     });
   }
 }
+
 
 export async function getUser(req,res){
   if(req.user == null){
@@ -265,6 +276,8 @@ export async function blockUser(req, res) {
     });
   }
 }
+
+
 
 
 
