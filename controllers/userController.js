@@ -238,3 +238,33 @@ export async function googleLogin(req, res) {
   }
 }
 
+export async function blockUser(req, res) {
+  if (req.user == null) {
+    res.json({
+      message: "Please login to view user details",
+    });
+    return;
+  }
+
+  try {
+    const { email, isBlocked } = req.body;
+
+    if (email && typeof isBlocked === "boolean") {
+      await User.updateOne({ email }, { $set: { isBlocked } });
+
+      res.json({
+        message: `User ${isBlocked ? "blocked" : "unblocked"} successfully`,
+      });
+      return;
+    }
+
+    res.json(req.user);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating user status: " + error,
+    });
+  }
+}
+
+
+
