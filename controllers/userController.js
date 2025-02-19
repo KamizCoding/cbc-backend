@@ -278,14 +278,14 @@ export async function blockUser(req, res) {
 }
 
 export async function updateUser(req, res) {
-  const { email } = req.params; // Get email from request params
-  const updateData = req.body; // Get updated user details from request body
+  const { email } = req.params; 
+  const updateData = req.body; 
 
   try {
     const updatedUser = await User.findOneAndUpdate(
-      { email },  // Find user by email
-      updateData, // Update with new data
-      { new: true, runValidators: true } // Return updated user and apply validations
+      { email },  
+      updateData, 
+      { new: true, runValidators: true } 
     );
 
     if (!updatedUser) {
