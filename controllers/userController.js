@@ -277,6 +277,33 @@ export async function blockUser(req, res) {
   }
 }
 
+export async function updateUser(req, res) {
+  const { email } = req.params; // Get email from request params
+  const updateData = req.body; // Get updated user details from request body
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { email },  // Find user by email
+      updateData, // Update with new data
+      { new: true, runValidators: true } // Return updated user and apply validations
+    );
+
+    if (!updatedUser) {
+      return res.json({
+        message: "The user with email " + email + " was not found",
+      });
+    }
+
+    return res.json({
+      message: "User details updated successfully",
+      updatedUser,
+    });
+  } catch (error) {
+    return res.json({
+      message: "User update failed due to an error: " + error,
+    });
+  }
+}
 
 
 
