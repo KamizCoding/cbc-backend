@@ -1,5 +1,5 @@
 import express from "express";
-import { delUser, googleLogin, listUser, newUser, userLogin} from "../controllers/userController.js";
+import { delUser, getUser, googleLogin, listUser, newUser, userLogin} from "../controllers/userController.js";
 
 //Create studentRouter
 const userRouter = express.Router();
@@ -7,6 +7,8 @@ const userRouter = express.Router();
 userRouter.post('/', newUser)
 
 userRouter.post('/login', userLogin)
+
+userRouter.get('/userdetail',getUser) 
 
 userRouter.get('',listUser)
 

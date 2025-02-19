@@ -95,6 +95,16 @@ export async function userLogin(req, res) {
   }
 }
 
+export async function getUser(req,res){
+  if(req.user == null){
+    res.json({
+      message : "Please login to view user details"
+    })
+    return
+  }
+  res.json(req.user)
+}
+
 export async function listUser(req, res) {
   console.log(req.user);
 
@@ -227,3 +237,4 @@ export async function googleLogin(req, res) {
     });
   }
 }
+
