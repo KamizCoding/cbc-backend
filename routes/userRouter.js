@@ -1,5 +1,5 @@
 import express from "express";
-import { blockUser, delUser, getUser, googleLogin, listUser, newUser, userLogin} from "../controllers/userController.js";
+import { blockUser, delUser, getUser, googleLogin, listUser, newUser, updateUser, userLogin} from "../controllers/userController.js";
 
 //Create studentRouter
 const userRouter = express.Router();
@@ -17,5 +17,7 @@ userRouter.delete('',delUser)
 userRouter.post("/google", googleLogin)
 
 userRouter.put("/", blockUser)
+
+userRouter.put('/update/:email', updateUser)
 
 export default userRouter;
