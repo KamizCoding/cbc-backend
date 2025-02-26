@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import UserActivity from "../models/userActivity.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -44,50 +45,54 @@ export async function newUser(req, res) {
 
 export async function userLogin(req, res) {
   try {
-    const userList = await User.find({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email });
 
-    if (userList.length === 0) {
+    if (!user) {
       return res.json({
-        message: "The specific user was not found",
+        message: "The specified user was not found",
         success: false,
       });
     }
 
-    const userObj = userList[0];
-
-    if (userObj.isBlocked) {
+    if (user.isBlocked) {
       return res.json({
         message: "Your account has been blocked. Contact support for assistance.",
         success: false,
-        blocked: true, 
+        blocked: true,
       });
     }
 
-    const isPasswordCorrect = bcrypt.compareSync(req.body.password, userObj.password);
+    const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
 
     if (isPasswordCorrect) {
       const token = jwt.sign(
         {
-          email: userObj.email,
-          firstName: userObj.firstName,
-          lastName: userObj.lastName,
-          isBlocked: userObj.isBlocked,
-          type: userObj.type,
-          profilePicture: userObj.profilePicture,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isBlocked: user.isBlocked,
+          type: user.type,
+          profilePicture: user.profilePicture,
         },
-        process.env.JWT_SECRET_KEY
+        process.env.JWT_SECRET_KEY,
+      );
+
+      await UserActivity.findOneAndUpdate(
+        { userId: user._id },
+        { lastLogin: new Date(), isActive: true, email: user.email, type: user.type },
+        { upsert: true }
       );
 
       return res.json({
         message: "Your login details are correct",
-        success: true, 
+        success: true,
         token: token,
         user: {
-          firstName: userObj.firstName,
-          lastName: userObj.lastName,
-          type: userObj.type,
-          profilePicture: userObj.profilePicture,
-          email: userObj.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          type: user.type,
+          profilePicture: user.profilePicture,
+          email: user.email,
         },
       });
     } else {
@@ -99,11 +104,12 @@ export async function userLogin(req, res) {
   } catch (error) {
     console.error(error);
     return res.json({
-      message: "The user was not created due to an error: " + error,
+      message: "The login attempt failed due to an error: " + error,
       success: false,
     });
   }
 }
+
 
 
 export async function getUser(req,res){
