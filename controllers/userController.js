@@ -110,6 +110,18 @@ export async function userLogin(req, res) {
   }
 }
 
+export const logoutUser = async (req, res) => {
+  try {
+    await UserActivity.findOneAndUpdate(
+      { userId: req.user.id },
+      { isActive: false }
+    );
+    
+    res.json({ message: "User logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Logout failed" });
+  }
+};
 
 export async function getUser(req,res){
   if(req.user == null){
