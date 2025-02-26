@@ -1,5 +1,5 @@
 import express from "express";
-import { blockUser, delUser, getUser, googleLogin, listUser, newUser, updateUser, userLogin} from "../controllers/userController.js";
+import { blockUser, delUser, getUser, getUserActivity, googleLogin, listUser, logoutUser, newUser, updateUser, userLogin} from "../controllers/userController.js";
 
 //Create studentRouter
 const userRouter = express.Router();
@@ -7,6 +7,8 @@ const userRouter = express.Router();
 userRouter.post('/', newUser)
 
 userRouter.post('/login', userLogin)
+
+router.post("/logout", logoutUser);
 
 userRouter.get('/userdetail',getUser) 
 
@@ -19,5 +21,7 @@ userRouter.post("/google", googleLogin)
 userRouter.put("/", blockUser)
 
 userRouter.put('/update/:email', updateUser)
+
+router.get("/activity", getUserActivity);
 
 export default userRouter;
