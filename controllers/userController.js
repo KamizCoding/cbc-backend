@@ -111,7 +111,6 @@ export async function userLogin(req, res) {
 }
 
 
-
 export async function getUser(req,res){
   if(req.user == null){
     res.json({
@@ -310,6 +309,17 @@ export async function updateUser(req, res) {
     });
   }
 }
+
+export const getUserActivity = async (req, res) => {
+  try {
+    const activeUsers = await UserActivity.find({ isActive: true }).select("email type");
+    const recentLogins = await UserActivity.find().sort({ lastLogin: -1 }).limit(5).select("email lastLogin type");
+
+    res.json({ activeUsers, recentLogins });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user activity" });
+  }
+};
 
 
 
