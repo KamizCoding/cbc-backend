@@ -247,3 +247,96 @@ export async function updateOrder(req, res) {
     });
   }
 }
+
+export async function getRevenueStats(req, res) {
+  try {
+    // Fetch all orders
+    const allOrders = await Order.find({});
+
+    // Calculate total revenue from existing orders
+    let totalRevenue = 0;
+    allOrders.forEach(order => {
+      order.orderedItems.forEach(item => {
+        totalRevenue += item.price * item.quantity;
+      });
+    });
+
+    // Get today's transaction count
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const transactionsToday = await Order.countDocuments({ date: { $gte: today } });
+
+    // Count pending refunds (Cancelled Orders)
+    const pendingRefunds = await Order.countDocuments({ status: "cancelled" });
+
+    // Estimate weekly growth (Using last 7 days)
+    const lastWeekStart = new Date();
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+    lastWeekStart.setHours(0, 0, 0, 0);
+    
+    const lastWeekOrders = await Order.find({ date: { $gte: lastWeekStart, $lt: today } });
+
+    let lastWeekRevenue = 0;
+    lastWeekOrders.forEach(order => {
+      order.orderedItems.forEach(item => {
+        lastWeekRevenue += item.price * item.quantity;
+      });
+    });
+
+    const weeklyGrowth = lastWeekRevenue ? ((totalRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : 0;
+
+    res.json({
+      totalRevenue,
+      transactionsToday,
+      pendingRefunds,
+      weeklyGrowth
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching revenue stats: " + error.message });
+  }
+}
+export async function getRevenueStats(req, res) {
+  try {
+    const allOrders = await Order.find({});
+
+    let totalRevenue = 0;
+    allOrders.forEach(order => {
+      order.orderedItems.forEach(item => {
+        totalRevenue += item.price * item.quantity;
+      });
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const transactionsToday = await Order.countDocuments({ date: { $gte: today } });
+
+    const pendingRefunds = await Order.countDocuments({ status: "cancelled" });
+
+    const lastWeekStart = new Date();
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+    lastWeekStart.setHours(0, 0, 0, 0);
+    
+    const lastWeekOrders = await Order.find({ date: { $gte: lastWeekStart, $lt: today } });
+
+    let lastWeekRevenue = 0;
+    lastWeekOrders.forEach(order => {
+      order.orderedItems.forEach(item => {
+        lastWeekRevenue += item.price * item.quantity;
+      });
+    });
+
+    const weeklyGrowth = lastWeekRevenue ? ((totalRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : 0;
+
+    res.json({
+      totalRevenue,
+      transactionsToday,
+      pendingRefunds,
+      weeklyGrowth
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching revenue stats: " + error.message });
+  }
+}
+

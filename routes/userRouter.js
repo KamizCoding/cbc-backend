@@ -8,7 +8,7 @@ userRouter.post('/', newUser)
 
 userRouter.post('/login', userLogin)
 
-router.post("/logout", logoutUser);
+userRouter.post("/logout", logoutUser);
 
 userRouter.get('/userdetail',getUser) 
 
@@ -22,6 +22,6 @@ userRouter.put("/", blockUser)
 
 userRouter.put('/update/:email', updateUser)
 
-router.get("/activity", getUserActivity);
+userRouter.get("/activity", getUserActivity);
 
 export default userRouter;
