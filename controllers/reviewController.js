@@ -1,15 +1,32 @@
-import express from "express";
 import Review from "../models/review.js";
 
-const router = express.Router();
+export async function addReview(req, res) {
+  console.log(req.user);
 
-router.post("/", protect, async (req, res) => {
+  if (req.user == null) {
+    res.json({
+      message: "You are not logged in",
+    });
+    return;
+  }
+
+  const { rating, comment } = req.body;
+
+  if (!rating || !comment) {
+    res.json({
+      message: "Missing required fields: rating and comment are required",
+    });
+    return;
+  }
+
   try {
-    const { rating, comment } = req.body;
-
     const existingReview = await Review.findOne({ user: req.user._id });
+
     if (existingReview) {
-      return res.status(400).json({ message: "You have already submitted a review!" });
+      res.json({
+        message: "You have already submitted a review!",
+      });
+      return;
     }
 
     const review = new Review({
@@ -20,18 +37,25 @@ router.post("/", protect, async (req, res) => {
     });
 
     await review.save();
-    res.status(201).json({ message: "Review submitted successfully!" });
+    res.json({
+      message: "Review submitted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to submit review", error });
+    res.json({
+      message: "Due to an error, the review couldn't be submitted: " + error,
+    });
   }
-});
+}
 
-router.get("/", async (req, res) => {
-    try {
-      const reviews = await Review.find().sort({ createdAt: -1 });
-      res.status(200).json(reviews);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch reviews", error });
-    }
-  });
-  
+export async function listReviews(req, res) {
+  try {
+    const reviews = await Review.find().sort({ createdAt: -1 });
+    res.json({
+      list: reviews,
+    });
+  } catch (error) {
+    res.json({
+      message: "Due to an error, reviews couldn't be retrieved: " + error,
+    });
+  }
+}
