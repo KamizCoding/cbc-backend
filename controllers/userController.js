@@ -56,13 +56,17 @@ export async function userLogin(req, res) {
 
     if (user.isBlocked) {
       return res.json({
-        message: "Your account has been blocked. Contact support for assistance.",
+        message:
+          "Your account has been blocked. Contact support for assistance.",
         success: false,
         blocked: true,
       });
     }
 
-    const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
+    const isPasswordCorrect = bcrypt.compareSync(
+      req.body.password,
+      user.password
+    );
 
     if (isPasswordCorrect) {
       const token = jwt.sign(
@@ -74,12 +78,17 @@ export async function userLogin(req, res) {
           type: user.type,
           profilePicture: user.profilePicture,
         },
-        process.env.JWT_SECRET_KEY,
+        process.env.JWT_SECRET_KEY
       );
 
       await UserActivity.findOneAndUpdate(
         { userId: user._id },
-        { lastLogin: new Date(), isActive: true, email: user.email, type: user.type },
+        {
+          lastLogin: new Date(),
+          isActive: true,
+          email: user.email,
+          type: user.type,
+        },
         { upsert: true }
       );
 
@@ -110,27 +119,71 @@ export async function userLogin(req, res) {
   }
 }
 
-export const logoutUser = async (req, res) => {
+export async function logoutUser(req, res) {
   try {
-    await UserActivity.findOneAndUpdate(
-      { userId: req.user.id },
-      { isActive: false }
-    );
-    
-    res.json({ message: "User logged out successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Logout failed" });
-  }
-};
+    console.log("Logout request received.");
 
-export async function getUser(req,res){
-  if(req.user == null){
-    res.json({
-      message : "Please login to view user details"
-    })
-    return
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log("No token provided.");
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    console.log("Extracted Token:", token);
+
+    const jwtSecret = process.env.JWT_SECRET_KEY || process.env.JWT_SECRET;
+    console.log("JWT Secret:", jwtSecret ? "Loaded" : "Not Found");
+
+    if (!jwtSecret) {
+      console.log("Error: JWT Secret is missing.");
+      return res
+        .status(500)
+        .json({ message: "Server error: Missing JWT secret" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, jwtSecret);
+
+      const userEmail = decoded.email;
+      if (!userEmail) {
+        console.log("User email missing in decoded token:", decoded);
+        return res.status(400).json({ message: "Invalid token data" });
+      }
+
+      console.log("Logging out user email:", userEmail);
+
+      const updatedUser = await UserActivity.findOneAndUpdate(
+        { email: userEmail },
+        { $set: { isActive: false, lastLogin: new Date() } },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        console.log("No matching user found for logout:", userEmail);
+        return res.status(404).json({ message: "User activity not found" });
+      }
+
+      return res.json({ message: "User logged out successfully" });
+    } catch (error) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ message: "Logout failed" });
   }
-  res.json(req.user)
+}
+
+export async function getUser(req, res) {
+  if (req.user == null) {
+    res.json({
+      message: "Please login to view user details",
+    });
+    return;
+  }
+  res.json(req.user);
 }
 
 export async function listUser(req, res) {
@@ -215,50 +268,56 @@ export async function googleLogin(req, res) {
     );
     const email = response.data.email;
 
-    const userList = await User.find({email:email})
+    const userList = await User.find({ email: email });
 
-    if (userList.length > 0){
-        const user = userList[0]
-        const token = jwt.sign({
-            email : user.email,
-            firstName : user.firstName,
-            lastName : user.lastName,
-            isBlocked : user.isBlocked,
-            type : user.type,
-            profilePicture : user.profilePicture
-        }, process.env.JWT_SECRET_KEY)
+    if (userList.length > 0) {
+      const user = userList[0];
+      const token = jwt.sign(
+        {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isBlocked: user.isBlocked,
+          type: user.type,
+          profilePicture: user.profilePicture,
+        },
+        process.env.JWT_SECRET_KEY
+      );
 
-        res.json({
-            message : "Google Login Succesful",
-            token : token,
-            user : {
-                firstName : user.firstName,
-                lastName : user.lastName,
-                type : user.type,
-                profilePicture : user.profilePicture,
-                email : user.email
-            }
+      res.json({
+        message: "Google Login Succesful",
+        token: token,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          type: user.type,
+          profilePicture: user.profilePicture,
+          email: user.email,
+        },
+      });
+    } else {
+      const newUserData = {
+        email: email,
+        firstName: response.data.given_name,
+        lastName: response.data.family_name,
+        type: "customer",
+        password: "newuser",
+        profilePicture: response.data.picture,
+      };
+      const user = new User(newUserData);
+      await user
+        .save()
+        .then(() => {
+          res.json({
+            message: "The New User Was Succesfully Created ",
+          });
         })
-    }else{
-        const newUserData = {
-            email : email,
-            firstName : response.data.given_name,
-            lastName : response.data.family_name,
-            type : "customer",
-            password : "newuser",
-            profilePicture : response.data.picture
-        }
-        const user = new User(newUserData)
-        await user.save().then(() => {
-            res.json({
-                message : "The New User Was Succesfully Created "
-            })
-        }).catch((error) => {
-            res.json({
-                message : "The New User Was Not Created"
-            })
-        })
-    }    
+        .catch((error) => {
+          res.json({
+            message: "The New User Was Not Created",
+          });
+        });
+    }
   } catch (error) {
     res.json({
       message: "Google Login Failed",
@@ -295,15 +354,14 @@ export async function blockUser(req, res) {
 }
 
 export async function updateUser(req, res) {
-  const { email } = req.params; 
-  const updateData = req.body; 
+  const { email } = req.params;
+  const updateData = req.body;
 
   try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email },  
-      updateData, 
-      { new: true, runValidators: true } 
-    );
+    const updatedUser = await User.findOneAndUpdate({ email }, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedUser) {
       return res.json({
@@ -324,15 +382,17 @@ export async function updateUser(req, res) {
 
 export const getUserActivity = async (req, res) => {
   try {
-    const activeUsers = await UserActivity.find({ isActive: true }).select("email type");
-    const recentLogins = await UserActivity.find().sort({ lastLogin: -1 }).limit(5).select("email lastLogin type");
+    const activeUsers = await UserActivity.find({ isActive: true }).select(
+      "email type"
+    );
+    const recentLogins = await UserActivity.find()
+      .sort({ lastLogin: -1 })
+      .limit(5)
+      .select("email lastLogin type");
 
     res.json({ activeUsers, recentLogins });
   } catch (error) {
+    console.error("Error fetching user activity:", error);
     res.status(500).json({ message: "Error fetching user activity" });
   }
 };
-
-
-
-
