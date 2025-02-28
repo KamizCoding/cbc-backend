@@ -60,3 +60,56 @@ export async function listReviews(req, res) {
     });
   }
 }
+
+export async function updateReview(req, res) {
+    console.log(req.user);
+
+    if (!req.user) {
+        res.json({
+            message: "You are not logged in",
+        });
+        return;
+    }
+
+    const { rating, comment } = req.body;
+
+    if (!rating && !comment) {
+        res.json({
+            message: "At least one field (rating or comment) must be provided to update.",
+        });
+        return;
+    }
+
+    try {
+        console.log("Received Update Data:", req.body);
+
+        const existingReview = await Review.findOne({ userEmail: req.user.email });
+
+        if (!existingReview) {
+            res.json({
+                message: "No review found for this user.",
+            });
+            return;
+        }
+
+        const updateFields = {};
+        if (rating !== undefined) updateFields.rating = rating;
+        if (comment !== undefined) updateFields.comment = comment;
+
+        const updatedReview = await Review.findOneAndUpdate(
+            { userEmail: req.user.email },
+            { $set: updateFields },
+            { new: true, runValidators: true }
+        );
+
+        res.json({
+            message: "Review updated successfully",
+            updatedReview,
+        });
+    } catch (error) {
+        res.json({
+            message: "Due to an error, the review couldn't be updated: " + error,
+        });
+    }
+}
+
