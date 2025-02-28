@@ -117,37 +117,22 @@ export async function delReview(req, res) {
   console.log(req.user);
 
   if (!req.user) {
-    res.json({
-      message: "You are not logged in",
-    });
-    return;
+    return res.json({ message: "You are not logged in" });
   }
 
   if (req.user.type !== "admin") {
-    res.json({
-      message: "You are not an admin and are not authorized to perform this action.",
-    });
-    return;
+    return res.json({ message: "Unauthorized. Only admins can delete reviews" });
   }
 
   try {
-    const result = await Review.findByIdAndDelete(req.params.id);
+    const deletedReview = await Review.findByIdAndDelete(req.params.id);
 
-    if (!result) {
-      res.json({
-        message: "The review with ID " + req.params.id + " was not found",
-      });
-      return;
+    if (!deletedReview) {
+      return res.json({ message: "Review not found" });
     }
 
-    res.json({
-      message: "The review was deleted successfully",
-      result,
-    });
+    res.json({ message: "Review deleted successfully", deletedReview });
   } catch (error) {
-    res.json({
-      message: "The review was not deleted due to an error: " + error,
-    });
+    res.json({ message: "Error deleting review: " + error });
   }
 }
-
